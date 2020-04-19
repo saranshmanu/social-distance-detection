@@ -1,8 +1,17 @@
 import time
-
 import cv2
 import numpy as np
+import requests 
 
+def update(level, value):
+    body = {
+        "restaurantUUID": "5e95e57eb578513ddb6d1df6",
+        "type": level,
+        "value": value
+    }
+    response = requests.post(url = 'http://localhost:4000/api/social-distance-aggregate', data = body) 
+    return response
+    
 confid = 0.5
 thresh = 0.5
 
@@ -33,6 +42,11 @@ np.random.seed(42)
 
 weightsPath = "./yolov3.weights"
 configPath = "./yolov3.cfg"
+
+total_p = 0
+low_risk_p = 0
+high_risk_p = 0
+safe_p = 0
 
 ###### use this for faster processing (caution: slighly lower accuracy) ###########
 
@@ -125,6 +139,20 @@ while True:
                         status[i] = 2
                     if status[j] != 1:
                         status[j] = 2
+
+        if status.count(2) != low_risk_p:
+            if(status.count(2) > low_risk_p):
+                difference = status.count(2) - low_risk_p
+                print(update('low', difference))
+        if status.count(1) != high_risk_p:
+            if(status.count(1) > high_risk_p):
+                difference = status.count(1) - high_risk_p
+                print(update('high', difference))
+        if status.count(0) != safe_p:
+            if(status.count(0) > safe_p):
+                difference = status.count(0) - safe_p
+                print(update('safe', difference))
+
 
         total_p = len(center)
         low_risk_p = status.count(2)
