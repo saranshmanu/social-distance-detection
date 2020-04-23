@@ -2,3 +2,4 @@
 /.vscode
 /models/yolov3.weights
 /venv
+videos/output.mp4
